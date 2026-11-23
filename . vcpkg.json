@@ -1,0 +1,5 @@
+{
+  "name": "geosearch-cpp",
+  "version": "0.1.0",
+  "dependencies": ["nlohmann-json", "cpp-httplib", "cpr", "catch2", "boost-algorithm"]
+}
