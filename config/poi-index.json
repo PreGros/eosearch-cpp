@@ -1,0 +1,55 @@
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0,
+    "analysis": {
+      "filter": {
+        "edge_ngram_2_15": {
+          "type": "edge_ngram",
+          "min_gram": 2,
+          "max_gram": 15
+        }
+      },
+      "analyzer": {
+        "cs_folded": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": ["lowercase", "asciifolding"]
+        },
+        "cs_autocomplete": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": ["lowercase", "asciifolding", "edge_ngram_2_15"]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "osm_id": { "type": "keyword" },
+      "name": {
+        "type": "text",
+        "analyzer": "cs_folded",
+        "fields": {
+          "autocomplete": {
+            "type": "text",
+            "analyzer": "cs_autocomplete",
+            "search_analyzer": "cs_folded"
+          },
+          "stem": { "type": "text", "analyzer": "czech" },
+          "raw": { "type": "keyword" }
+        }
+      },
+      "category": { "type": "keyword" },
+      "city": {
+        "type": "text",
+        "analyzer": "cs_folded",
+        "fields": { "raw": { "type": "keyword" } }
+      },
+      "street": { "type": "text", "analyzer": "cs_folded" },
+      "housenumber": { "type": "keyword" },
+      "location": { "type": "geo_point" }
+    }
+  }
+}

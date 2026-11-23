@@ -5,32 +5,40 @@ project(geosearch-cpp VERSION 0.1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON) 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)  # for IntelliSense / clangd in VS Code
 
-# Dependencies
+# Dependencies (installed through vcpkg manifest mode, see vcpkg.json)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(cpr CONFIG REQUIRED)
 find_package(httplib CONFIG REQUIRED)
 
+# Core library: data model and logic, no main(). Tests will link against this.
+add_library(geosearch_core STATIC
+    src/poi.cpp
+)
+target_include_directories(geosearch_core PUBLIC include)
+target_link_libraries(geosearch_core PUBLIC nlohmann_json::nlohmann_json)
+
+# Executable
 add_executable(geosearch
     src/main.cpp
 )
-
-target_include_directories(geosearch PRIVATE include)
-
 target_link_libraries(geosearch PRIVATE
-    nlohmann_json::nlohmann_json
+    geosearch_core
     cpr::cpr
     httplib::httplib
 )
 
-if(MSVC)
-    target_compile_options(geosearch PRIVATE /W4 /permissive- /utf-8)
-    target_compile_definitions(geosearch PRIVATE _CRT_SECURE_NO_WARNINGS)
-else()
-    target_compile_options(geosearch PRIVATE -Wall -Wextra -Wpedantic)
-endif()
+foreach(target geosearch_core geosearch)
+    if(MSVC)
+        target_compile_options(${target} PRIVATE /W4 /permissive- /utf-8)
+        target_compile_definitions(${target} PRIVATE _CRT_SECURE_NO_WARNINGS)
+    else()
+        target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
+endforeach()
 
+# Tests (Catch2) are picked up automatically once tests/CMakeLists.txt exists
 include(CTest)
 if(BUILD_TESTING AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/CMakeLists.txt")
     add_subdirectory(tests)
