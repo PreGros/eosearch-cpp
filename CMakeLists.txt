@@ -15,9 +15,10 @@ find_package(httplib CONFIG REQUIRED)
 # Core library: data model and logic, no main(). Tests will link against this.
 add_library(geosearch_core STATIC
     src/poi.cpp
+    src/indexer.cpp
 )
 target_include_directories(geosearch_core PUBLIC include)
-target_link_libraries(geosearch_core PUBLIC nlohmann_json::nlohmann_json)
+target_link_libraries(geosearch_core PUBLIC nlohmann_json::nlohmann_json cpr::cpr)
 
 # Executable
 add_executable(geosearch
